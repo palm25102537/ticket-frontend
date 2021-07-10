@@ -1,4 +1,4 @@
-import { useContext, createContext, useReducer } from "react";
+import { useContext, createContext, useReducer, useState } from "react";
 import service from '../service/localStorageService'
 
 
@@ -26,7 +26,8 @@ function authenByReducer(state, action) {
 }
 function Provider(props) {
   const [state, dispatch] = useReducer(authenByReducer, INITIAL_STATE)
-  const provide = { state, dispatch }
+  const [troggle, setTroggle] = useState(false)
+  const provide = { state, dispatch, troggle, setTroggle }
   return (
     <myContext.Provider value={provide}>{props.children}</myContext.Provider>
   )

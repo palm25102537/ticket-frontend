@@ -1,55 +1,106 @@
 import React, { useEffect, useState } from 'react'
 import Header from '../component/Header'
 import axios from '../config/axios'
-import Dropdown from '../component/Dropdown'
+import Homework from '../component/Homework'
+import Button from '@material-ui/core/Button'
+import CreateHomework from '../component/CreateHomework'
+import { useMyContext } from '../context/myContext'
+import { useHistory } from 'react-router-dom'
+
+
 function Homeworkpage() {
 
   const [homework, setHomework] = useState()
 
+  const [myInfo, setMyInfo] = useState()
+
+  async function getMe() {
+    const response = await axios.get('/user')
+    const { data } = response
+    setMyInfo(data)
+
+  }
+
   async function getHomework() {
-    const response = await axios.get('/homework')
+    const response = await axios.get('/homework?order=id&desc=y')
     const { data: { homework } } = response
     setHomework(homework)
   }
 
   useEffect(() => {
     getHomework()
+    getMe()
   }, [])
+
+  const { dispatch } = useMyContext()
+
+  const history = useHistory()
+
+  function signOut() {
+    dispatch({
+      type: "clearToken"
+    })
+    alert('Good Bye')
+    history.push('/')
+  }
+
+
   return (
     <div>
       <Header />
       <div className='homework-grid'>
-        <div></div>
         <div>
-          <h2>Homework</h2>
-          <div style={{ width: '100%' }}>
-            {
-              homework?.map((item) => {
-                console.log(item)
-                return (
-                  <div style={{ textAlign: 'left', marginTop: '20px', padding: '10px', boxShadow: '1px 1px 8px 1px rgba(0, 0, 0, 0.2)' }}>
-                    <h3>Subject : {item.Subject.name}</h3>
-                    <p>Title : {item.title}</p>
-                    <p>Description : {item.description}</p>
-                    <p>Status : {item.status}</p>
-                    <div style={{ textAlign: 'right', marginRight: '10px' }}>
-                      <div>
-                        <Dropdown selectedList={['Send', "Delete"]} />
-                      </div>
-                      <br />
-                      <p>Created By {item.User.name}</p>
-                      <p>Updated at {item.updatedAt}</p>
-                    </div>
-                  </div>
-
-                )
-              })
-            }
-          </div>
-
+          {
+            myInfo?.role === "Teacher" && (
+              <>
+                <Homework role={myInfo.role} getHomework={getHomework} homework={homework} />
+              </>
+            )
+          }
         </div>
-        <div></div>
+        <div>
+          {
+            myInfo?.role === "Student" && (
+              <>
+                <div>
+                  <Button style={{
+                    backgroundColor: '#01A9E8',
+                    color: 'white',
+                    width: '250px',
+                    marginTop: '5px'
+                  }}
+                    variant='outlined'
+                    onClick={signOut}
+                  >Sign Out</Button>
+                </div>
+                <br />
+                <Homework role={myInfo.role} classId={myInfo.classId} getHomework={getHomework} homework={homework} />
+              </>
+            )
+          }
+          {
+            myInfo?.role === "Teacher" && (
+              <>
+                <div>
+                  <Button style={{
+                    color: 'black',
+                    width: '250px',
+                    marginTop: '5px'
+                  }}
+                    variant='outlined'
+                    onClick={signOut}
+                  >Sign Out</Button>
+                </div>
+                <br />
+                <div>
+                  <CreateHomework getHomework={getHomework} />
+                </div>
+              </>
+            )
+          }
+        </div>
       </div>
+      <div></div>
     </div >
   )
 }

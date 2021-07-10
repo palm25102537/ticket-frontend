@@ -1,9 +1,12 @@
-import React, { useState } from 'react'
+import React from 'react'
+import { useMyContext } from '../context/myContext'
 
 function Dropdown(props) {
-  const { selectedList } = props
+  const { selectList, selectFunction, value } = props
   const a = null
-  const [troggle, setTroggle] = useState(false)
+
+  const { troggle, setTroggle } = useMyContext()
+
   function handleTroggleDropdown() {
     if (!troggle) {
       setTroggle(true)
@@ -11,6 +14,7 @@ function Dropdown(props) {
       setTroggle(false)
     }
   }
+
   return (
     <div className="dropdown-container">
       <span>
@@ -19,10 +23,10 @@ function Dropdown(props) {
 
       <div className={troggle ? 'dropdown-content-show' : 'dropdown-content'}>
         {
-          selectedList?.map((item) => {
+          selectList?.map((item) => {
             return (
               <>
-                <a>{item}</a>
+                <a href={a} onClick={() => selectFunction(item, value)}>{item}</a>
               </>
             )
           })
